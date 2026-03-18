@@ -63,30 +63,68 @@
       transition: all 1.5s ease !important;
     }
 
-    .glitch-overlay {
+    /* ============================
+       LETTER SWAP OVERLAY
+       ============================ */
+    .letter-overlay {
       position: fixed;
       top: 0; left: 0; right: 0; bottom: 0;
       z-index: 9999;
+      background: #0a0618;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
       pointer-events: none;
+      transition: opacity 0.5s ease;
+    }
+    .letter-overlay.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .letter-overlay.fade-out {
+      opacity: 0;
+      transition: opacity 0.8s ease;
+    }
+
+    .letter-container {
+      position: relative;
+      height: 120px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .swap-letter {
+      position: absolute;
+      font-size: 5rem;
+      font-weight: 800;
+      color: #a78bfa;
+      text-shadow: 0 0 30px rgba(167, 139, 250, 0.6);
+      transition: all 1.2s cubic-bezier(0.34, 1.56, 0.64, 1);
       opacity: 0;
     }
 
-    .glitch-overlay.active {
-      animation: glitchFlash 2s ease-out forwards;
+    .swap-letter.visible {
+      opacity: 1;
     }
 
-    @keyframes glitchFlash {
-      0%   { opacity: 0; background: transparent; }
-      5%   { opacity: 1; background: #7c3aed; }
-      10%  { opacity: 0; background: transparent; }
-      15%  { opacity: 1; background: #a78bfa; }
-      20%  { opacity: 0; background: transparent; }
-      25%  { opacity: 0.8; background: #7c3aed; }
-      30%  { opacity: 0; }
-      35%  { opacity: 0.6; background: #c4b5fd; }
-      40%  { opacity: 0; }
-      50%  { opacity: 0.3; background: #7c3aed; }
-      100% { opacity: 0; }
+    .swap-letter.glow {
+      color: #c4b5fd;
+      text-shadow: 0 0 40px rgba(196, 181, 253, 0.8), 0 0 80px rgba(124, 58, 237, 0.5);
+    }
+
+    .swap-subtitle {
+      position: absolute;
+      bottom: calc(50% - 100px);
+      font-size: 1.1rem;
+      color: #64548a;
+      letter-spacing: 0.3em;
+      opacity: 0;
+      transition: opacity 0.8s ease;
+    }
+    .swap-subtitle.visible {
+      opacity: 1;
     }
 
     /* Particles (Site B only) */
@@ -385,8 +423,11 @@
     "SEIKAI" → "ISEKAI" に変更すると...?
   =========================== -->
 
-  <!-- GLITCH OVERLAY -->
-  <div class="glitch-overlay" id="glitchOverlay"></div>
+  <!-- LETTER SWAP OVERLAY -->
+  <div class="letter-overlay" id="letterOverlay">
+    <div class="swap-subtitle" id="swapSubtitle">DECODING...</div>
+    <div class="letter-container" id="letterContainer"></div>
+  </div>
 
   <!-- PARTICLES (Isekai mode) -->
   <div class="particles" id="particles"></div>
@@ -565,14 +606,80 @@
       // Prevent double trigger
       if (document.body.classList.contains('isekai')) return;
 
-      // 1. Flash glitch overlay
-      document.getElementById('glitchOverlay').classList.add('active');
+      const overlay = document.getElementById('letterOverlay');
+      const container = document.getElementById('letterContainer');
+      const subtitle = document.getElementById('swapSubtitle');
 
-      // 2. Add transition class
-      document.body.classList.add('transitioning');
+      // Letter width unit (responsive)
+      const unit = Math.min(window.innerWidth / 8, 70);
+      const fontSize = Math.min(window.innerWidth / 10, 80);
 
-      // 3. After a brief delay, swap content and apply isekai theme
+      // SEIKAI letters and their target positions in ISEKAI
+      // SEIKAI: S(0) E(1) I(2) K(3) A(4) I(5)
+      // ISEKAI: I(0) S(1) E(2) K(3) A(4) I(5)
+      // So: S moves 0→1, E moves 1→2, I moves 2→0, K stays, A stays, I stays
+      const letters = [
+        { char: 'S', from: 0, to: 1 },
+        { char: 'E', from: 1, to: 2 },
+        { char: 'I', from: 2, to: 0, highlight: true },
+        { char: 'K', from: 3, to: 3 },
+        { char: 'A', from: 4, to: 4 },
+        { char: 'I', from: 5, to: 5 },
+      ];
+
+      // Calculate offset so letters are centered
+      const totalWidth = 6 * unit;
+      const offsetX = -totalWidth / 2 + unit / 2;
+
+      // Create letter elements
+      const els = letters.map((l, i) => {
+        const el = document.createElement('div');
+        el.classList.add('swap-letter');
+        el.textContent = l.char;
+        el.style.fontSize = fontSize + 'px';
+        el.style.left = (offsetX + l.from * unit) + 'px';
+        if (l.highlight) el.style.color = '#f59e0b';
+        container.appendChild(el);
+        return el;
+      });
+
+      // Phase 1: Show overlay & letters appear
+      overlay.classList.add('active');
+
       setTimeout(() => {
+        subtitle.classList.add('visible');
+      }, 200);
+
+      setTimeout(() => {
+        els.forEach((el, i) => {
+          setTimeout(() => el.classList.add('visible'), i * 100);
+        });
+      }, 500);
+
+      // Phase 2: Letters rearrange (I moves to front, S and E shift right)
+      setTimeout(() => {
+        subtitle.textContent = 'TRANSFORMING...';
+        letters.forEach((l, i) => {
+          els[i].style.left = (offsetX + l.to * unit) + 'px';
+          if (l.highlight) {
+            els[i].classList.add('glow');
+          }
+        });
+      }, 1800);
+
+      // Phase 3: All letters glow as ISEKAI
+      setTimeout(() => {
+        subtitle.textContent = 'I S E K A I';
+        subtitle.style.color = '#a78bfa';
+        els.forEach(el => {
+          el.classList.add('glow');
+          el.style.color = '#c4b5fd';
+        });
+      }, 3200);
+
+      // Phase 4: Swap site content behind overlay
+      setTimeout(() => {
+        document.body.classList.add('transitioning');
         document.body.classList.add('isekai');
         document.title = 'ISEKAI CAREER SCOUT';
 
@@ -612,21 +719,24 @@
           job.tags.forEach((t, j) => { if (tags[j]) tags[j].textContent = t; });
           cards[i].querySelector('.job-salary').textContent = job.salary;
         });
+      }, 3800);
 
-        // 4. Show success toast
+      // Phase 5: Fade out overlay, reveal transformed site
+      setTimeout(() => {
+        overlay.classList.add('fade-out');
+
         setTimeout(() => {
+          overlay.classList.remove('active', 'fade-out');
+          container.innerHTML = '';
+          document.body.classList.remove('transitioning');
+
+          // Show success toast
           document.getElementById('successToast').classList.add('show');
           setTimeout(() => {
             document.getElementById('successToast').classList.remove('show');
           }, 4000);
         }, 800);
-
-      }, 300);
-
-      // Cleanup transition class
-      setTimeout(() => {
-        document.body.classList.remove('transitioning');
-      }, 2500);
+      }, 4500);
     }
 
     // ============================================
