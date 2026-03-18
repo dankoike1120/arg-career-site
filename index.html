@@ -354,9 +354,7 @@
       data-key を探せ。
       ========================================
     */
-    #site-core {
-      display: none;
-    }
+    /* data-key is on the footer <p> element */
 
     /* ============================
        TRANSFORM SUCCESS MESSAGE
@@ -383,10 +381,9 @@
 <body>
 
   <!-- ===========================
-    THE KEY: この要素の data-key を書き換えよ
-    "SEIKAI" → "ISEKAI" に変更すると...
+    HINT: data-key を探せ。
+    "SEIKAI" → "ISEKAI" に変更すると...?
   =========================== -->
-  <div id="site-core" data-key="SEIKAI"></div>
 
   <!-- GLITCH OVERLAY -->
   <div class="glitch-overlay" id="glitchOverlay"></div>
@@ -484,7 +481,7 @@
 
   <!-- FOOTER -->
   <footer>
-    <p id="footerText">&copy; 2026 SEIKAI CAREER SCOUT. All rights reserved.</p>
+    <p id="footerText" data-key="SEIKAI">&copy; 2026 SEIKAI CAREER SCOUT. All rights reserved.</p>
   </footer>
 
   <!-- SUCCESS TOAST -->
@@ -635,7 +632,7 @@
     // ============================================
     //  MUTATION OBSERVER - watches for data-key change
     // ============================================
-    const siteCore = document.getElementById('site-core');
+    const siteCore = document.getElementById('footerText');
 
     const observer = new MutationObserver((mutations) => {
       for (const mutation of mutations) {
@@ -663,7 +660,7 @@
       'color: #64748b;'
     );
     console.log(
-      '%c[WARNING] %ccharset anomaly detected in #site-core — data-key mismatch',
+      '%c[WARNING] %ccharset anomaly detected in footer — data-key mismatch',
       'color: #f59e0b; font-weight: bold;',
       'color: #64748b;'
     );
