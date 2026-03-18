@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SEIKAI CAREER SCOUT</title>
+  <style>
+    /* ============================
+       BASE / SHARED STYLES
+       ============================ */
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      /* Site A: Corporate Blue */
+      --primary: #1a56db;
+      --primary-dark: #1e3a8a;
+      --accent: #3b82f6;
+      --bg: #f8fafc;
+      --card-bg: #ffffff;
+      --text: #1e293b;
+      --text-sub: #64748b;
+      --hero-bg: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+      --tag-bg: #dbeafe;
+      --tag-text: #1e40af;
+      --badge-bg: #dcfce7;
+      --badge-text: #166534;
+      --border: #e2e8f0;
+      --glow: none;
+      --font-heading: 'Segoe UI', 'Hiragino Sans', sans-serif;
+    }
+
+    /* Site B: Isekai Fantasy */
+    .isekai {
+      --primary: #7c3aed;
+      --primary-dark: #312e81;
+      --accent: #a78bfa;
+      --bg: #0f0b1a;
+      --card-bg: #1a1333;
+      --text: #e2d9f3;
+      --text-sub: #a09cb5;
+      --hero-bg: linear-gradient(135deg, #1a0533 0%, #312e81 40%, #7c3aed 100%);
+      --tag-bg: #2e1065;
+      --tag-text: #c4b5fd;
+      --badge-bg: #1e1b4b;
+      --badge-text: #a78bfa;
+      --border: #2d2640;
+      --glow: 0 0 30px rgba(124, 58, 237, 0.3);
+      --font-heading: 'Segoe UI', 'Hiragino Sans', sans-serif;
+    }
+
+    body {
+      font-family: var(--font-heading);
+      background: var(--bg);
+      color: var(--text);
+      transition: background 1.5s ease, color 1.5s ease;
+      overflow-x: hidden;
+    }
+
+    /* ============================
+       TRANSITION EFFECTS
+       ============================ */
+    .transitioning * {
+      transition: all 1.5s ease !important;
+    }
+
+    .glitch-overlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      z-index: 9999;
+      pointer-events: none;
+      opacity: 0;
+    }
+
+    .glitch-overlay.active {
+      animation: glitchFlash 2s ease-out forwards;
+    }
+
+    @keyframes glitchFlash {
+      0%   { opacity: 0; background: transparent; }
+      5%   { opacity: 1; background: #7c3aed; }
+      10%  { opacity: 0; background: transparent; }
+      15%  { opacity: 1; background: #a78bfa; }
+      20%  { opacity: 0; background: transparent; }
+      25%  { opacity: 0.8; background: #7c3aed; }
+      30%  { opacity: 0; }
+      35%  { opacity: 0.6; background: #c4b5fd; }
+      40%  { opacity: 0; }
+      50%  { opacity: 0.3; background: #7c3aed; }
+      100% { opacity: 0; }
+    }
+
+    /* Particles (Site B only) */
+    .particles {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0;
+      transition: opacity 2s ease 1s;
+    }
+    .isekai .particles { opacity: 1; }
+
+    .particle {
+      position: absolute;
+      width: 4px; height: 4px;
+      background: #a78bfa;
+      border-radius: 50%;
+      animation: float 8s infinite ease-in-out;
+      box-shadow: 0 0 6px #a78bfa;
+    }
+
+    @keyframes float {
+      0%, 100% { transform: translateY(0) scale(1); opacity: 0.3; }
+      50% { transform: translateY(-120px) scale(1.5); opacity: 0.8; }
+    }
+
+    /* ============================
+       NAVIGATION
+       ============================ */
+    nav {
+      background: var(--card-bg);
+      border-bottom: 1px solid var(--border);
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      transition: background 1.5s ease, border-color 1.5s ease, box-shadow 1.5s ease;
+    }
+    .isekai nav { box-shadow: var(--glow); }
+
+    .logo {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--primary);
+      letter-spacing: 0.05em;
+      transition: color 1.5s ease;
+    }
+
+    .nav-links { display: flex; gap: 1.5rem; list-style: none; }
+    .nav-links a {
+      text-decoration: none;
+      color: var(--text-sub);
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: color 0.3s ease;
+    }
+    .nav-links a:hover { color: var(--primary); }
+
+    /* ============================
+       HERO SECTION
+       ============================ */
+    .hero {
+      background: var(--hero-bg);
+      padding: 5rem 2rem;
+      text-align: center;
+      color: #fff;
+      position: relative;
+      overflow: hidden;
+      transition: background 1.5s ease;
+    }
+
+    .hero h1 {
+      font-size: 2.5rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      line-height: 1.3;
+    }
+
+    .hero .subtitle {
+      font-size: 1.15rem;
+      opacity: 0.9;
+      margin-bottom: 2rem;
+      font-weight: 400;
+    }
+
+    .hero-cta {
+      display: inline-block;
+      background: #fff;
+      color: var(--primary-dark);
+      padding: 0.85rem 2.5rem;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 1rem;
+      text-decoration: none;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .hero-cta:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    }
+    .isekai .hero-cta {
+      background: linear-gradient(135deg, #c4b5fd, #a78bfa);
+      color: #1a0533;
+      box-shadow: 0 0 20px rgba(167, 139, 250, 0.4);
+    }
+
+    /* ============================
+       SECTIONS
+       ============================ */
+    .section {
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 4rem 2rem;
+    }
+
+    .section-title {
+      font-size: 1.6rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      color: var(--text);
+      transition: color 1.5s ease;
+    }
+
+    .section-desc {
+      color: var(--text-sub);
+      margin-bottom: 2rem;
+      font-size: 0.95rem;
+      transition: color 1.5s ease;
+    }
+
+    /* ============================
+       JOB CARDS
+       ============================ */
+    .job-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .job-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 1.5rem;
+      transition: transform 0.3s ease, box-shadow 0.3s ease, background 1.5s ease, border-color 1.5s ease;
+    }
+    .job-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+    }
+    .isekai .job-card:hover {
+      box-shadow: 0 12px 30px rgba(124, 58, 237, 0.2);
+    }
+
+    .job-card h3 {
+      font-size: 1.1rem;
+      margin-bottom: 0.4rem;
+      color: var(--text);
+      transition: color 1.5s ease;
+    }
+
+    .job-card .company {
+      font-size: 0.85rem;
+      color: var(--primary);
+      font-weight: 600;
+      margin-bottom: 0.6rem;
+      transition: color 1.5s ease;
+    }
+
+    .job-card .description {
+      font-size: 0.88rem;
+      color: var(--text-sub);
+      line-height: 1.55;
+      margin-bottom: 1rem;
+      transition: color 1.5s ease;
+    }
+
+    .tags { display: flex; flex-wrap: wrap; gap: 0.4rem; margin-bottom: 0.8rem; }
+    .tag {
+      background: var(--tag-bg);
+      color: var(--tag-text);
+      padding: 0.25rem 0.65rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      transition: background 1.5s ease, color 1.5s ease;
+    }
+
+    .salary-badge {
+      display: inline-block;
+      background: var(--badge-bg);
+      color: var(--badge-text);
+      padding: 0.3rem 0.8rem;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      transition: background 1.5s ease, color 1.5s ease;
+    }
+
+    /* ============================
+       FEATURES
+       ============================ */
+    .features {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+    }
+    @media (max-width: 768px) {
+      .features { grid-template-columns: 1fr; }
+    }
+
+    .feature {
+      text-align: center;
+      padding: 2rem 1rem;
+    }
+
+    .feature-icon {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .feature h3 {
+      font-size: 1.05rem;
+      margin-bottom: 0.5rem;
+      color: var(--text);
+      transition: color 1.5s ease;
+    }
+
+    .feature p {
+      font-size: 0.88rem;
+      color: var(--text-sub);
+      line-height: 1.5;
+      transition: color 1.5s ease;
+    }
+
+    /* ============================
+       FOOTER
+       ============================ */
+    footer {
+      text-align: center;
+      padding: 2rem;
+      border-top: 1px solid var(--border);
+      color: var(--text-sub);
+      font-size: 0.8rem;
+      transition: border-color 1.5s ease, color 1.5s ease;
+    }
+
+    /* ============================
+       THE KEY ELEMENT
+       ============================ */
+    /*
+      ========================================
+      HINT: このサイトは文字化けしている...
+
+      「正解」のスペルを確認してみて。
+      本当にそれは「正解」なのか？
+
+      もしかしたら、別の世界(SEKAI)が
+      見えるかもしれない。
+
+      data-key を探せ。
+      ========================================
+    */
+    #site-core {
+      display: none;
+    }
+
+    /* ============================
+       TRANSFORM SUCCESS MESSAGE
+       ============================ */
+    .success-toast {
+      position: fixed;
+      bottom: -100px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: linear-gradient(135deg, #7c3aed, #a78bfa);
+      color: white;
+      padding: 1rem 2rem;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 1rem;
+      z-index: 10000;
+      transition: bottom 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      box-shadow: 0 8px 30px rgba(124, 58, 237, 0.4);
+      white-space: nowrap;
+    }
+    .success-toast.show { bottom: 2rem; }
+  </style>
+</head>
+<body>
+
+  <!-- ===========================
+    THE KEY: この要素の data-key を書き換えよ
+    "SEIKAI" → "ISEKAI" に変更すると...
+  =========================== -->
+  <div id="site-core" data-key="SEIKAI"></div>
+
+  <!-- GLITCH OVERLAY -->
+  <div class="glitch-overlay" id="glitchOverlay"></div>
+
+  <!-- PARTICLES (Isekai mode) -->
+  <div class="particles" id="particles"></div>
+
+  <!-- NAVIGATION -->
+  <nav>
+    <div class="logo" id="logoText">SEIKAI CAREER SCOUT</div>
+    <ul class="nav-links">
+      <li><a href="#jobs" id="navJobs">求人一覧</a></li>
+      <li><a href="#features" id="navFeatures">特徴</a></li>
+      <li><a href="#" id="navContact">お問い合わせ</a></li>
+    </ul>
+  </nav>
+
+  <!-- HERO -->
+  <div class="hero">
+    <h1 id="heroTitle">キャリアの正解を、探そう。</h1>
+    <p class="subtitle" id="heroSubtitle">あなたの経験とスキルにマッチした、最適なキャリアをAIがスカウト。</p>
+    <a href="#jobs" class="hero-cta" id="heroCta">求人を見る</a>
+  </div>
+
+  <!-- JOB LISTINGS -->
+  <div class="section" id="jobs">
+    <h2 class="section-title" id="jobsTitle">注目の求人</h2>
+    <p class="section-desc" id="jobsDesc">あなたにぴったりのキャリアが見つかります。</p>
+
+    <div class="job-grid" id="jobGrid">
+      <!-- Job Card 1 -->
+      <div class="job-card">
+        <h3 class="job-name">シニアプロダクトマネージャー</h3>
+        <div class="company job-company">テックフォワード株式会社</div>
+        <p class="description job-desc">自社プロダクトの戦略策定から実行まで、裁量大きくリードできるポジションです。</p>
+        <div class="tags">
+          <span class="tag job-tag-1">リモート可</span>
+          <span class="tag job-tag-2">フレックス</span>
+          <span class="tag job-tag-3">上場企業</span>
+        </div>
+        <span class="salary-badge job-salary">年収 800〜1,200万円</span>
+      </div>
+
+      <!-- Job Card 2 -->
+      <div class="job-card">
+        <h3 class="job-name">フルスタックエンジニア</h3>
+        <div class="company job-company">グロースベンチャーズ</div>
+        <p class="description job-desc">急成長中のSaaSプロダクトを技術面からリード。モダンな技術スタックで開発できます。</p>
+        <div class="tags">
+          <span class="tag job-tag-1">TypeScript</span>
+          <span class="tag job-tag-2">React</span>
+          <span class="tag job-tag-3">AWS</span>
+        </div>
+        <span class="salary-badge job-salary">年収 700〜1,000万円</span>
+      </div>
+
+      <!-- Job Card 3 -->
+      <div class="job-card">
+        <h3 class="job-name">UXデザインリード</h3>
+        <div class="company job-company">クリエイトスタジオ</div>
+        <p class="description job-desc">ユーザーリサーチからプロトタイプまで、デザインチームを率いてプロダクト体験を創造。</p>
+        <div class="tags">
+          <span class="tag job-tag-1">Figma</span>
+          <span class="tag job-tag-2">デザインシステム</span>
+          <span class="tag job-tag-3">副業OK</span>
+        </div>
+        <span class="salary-badge job-salary">年収 650〜900万円</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- FEATURES -->
+  <div class="section" id="features">
+    <h2 class="section-title" id="featuresTitle">SEIKAI CAREER の特徴</h2>
+    <p class="section-desc" id="featuresDesc">テクノロジーで、キャリアの正解を見つける。</p>
+
+    <div class="features">
+      <div class="feature">
+        <div class="feature-icon" id="feat1Icon">🎯</div>
+        <h3 id="feat1Title">AIマッチング</h3>
+        <p id="feat1Desc">独自のアルゴリズムがあなたのスキルと経験を分析し、最適な求人をレコメンド。</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon" id="feat2Icon">🤝</div>
+        <h3 id="feat2Title">ダイレクトスカウト</h3>
+        <p id="feat2Desc">企業の決裁者から直接スカウトが届く。ミスマッチのない転職を実現。</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon" id="feat3Icon">📊</div>
+        <h3 id="feat3Title">市場価値診断</h3>
+        <p id="feat3Desc">あなたの市場価値をリアルタイムで可視化。年収交渉にも活用できます。</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <p id="footerText">&copy; 2026 SEIKAI CAREER SCOUT. All rights reserved.</p>
+  </footer>
+
+  <!-- SUCCESS TOAST -->
+  <div class="success-toast" id="successToast">
+    &#x2728; 異世界への扉が開かれた... &#x2728;
+  </div>
+
+  <script>
+    // ============================================
+    // Generate particles for Isekai mode
+    // ============================================
+    (function initParticles() {
+      const container = document.getElementById('particles');
+      for (let i = 0; i < 40; i++) {
+        const p = document.createElement('div');
+        p.classList.add('particle');
+        p.style.left = Math.random() * 100 + '%';
+        p.style.top = Math.random() * 100 + '%';
+        p.style.animationDelay = Math.random() * 8 + 's';
+        p.style.animationDuration = (6 + Math.random() * 6) + 's';
+        p.style.width = p.style.height = (2 + Math.random() * 4) + 'px';
+        container.appendChild(p);
+      }
+    })();
+
+    // ============================================
+    //  ISEKAI CONTENT DEFINITIONS
+    // ============================================
+    const isekaiContent = {
+      title: 'SEIKAI CAREER SCOUT',
+      logo: 'ISEKAI CAREER SCOUT',
+      heroTitle: '異世界のキャリアを、探そう。',
+      heroSubtitle: 'あなたの前世の経験とスキルにマッチした、最適な異世界キャリアを魔法AIがスカウト。',
+      heroCta: '異世界求人を見る',
+      navJobs: '異世界求人',
+      navFeatures: '特徴',
+      navContact: '召喚お問い合わせ',
+      jobsTitle: '注目の異世界求人',
+      jobsDesc: 'あなたにぴったりの異世界キャリアが見つかります。',
+      featuresTitle: 'ISEKAI CAREER の特徴',
+      featuresDesc: '魔法テクノロジーで、異世界のキャリアを見つける。',
+      footerText: '&copy; 2026 ISEKAI CAREER SCOUT. All rights reserved. &#x2728;',
+      feat1Icon: '&#x1F52E;',
+      feat1Title: '魔法AIマッチング',
+      feat1Desc: '古代魔法アルゴリズムがあなたの前世スキルと魔力を分析し、最適な異世界求人をレコメンド。',
+      feat2Icon: '&#x1F409;',
+      feat2Title: '勇者ダイレクトスカウト',
+      feat2Desc: '異世界の王族や魔王から直接スカウトが届く。運命のミスマッチのない転生を実現。',
+      feat3Icon: '&#x2694;&#xFE0F;',
+      feat3Title: '戦闘力診断',
+      feat3Desc: 'あなたの異世界での戦闘力をリアルタイムで可視化。報酬交渉にも活用できます。',
+      jobs: [
+        {
+          name: '勇者パーティー フロントアタッカー',
+          company: '魔王討伐ギルド',
+          desc: '魔王軍との最前線で活躍するポジション。剣術スキルLv.5以上、回復魔法の基礎知識があれば尚可。',
+          tags: ['剣術', '冒険者ランクA', '宿舎完備'],
+          salary: '年俸 金貨800〜1,200枚'
+        },
+        {
+          name: '宮廷魔法エンジニア',
+          company: 'エルフ王国 技術省',
+          desc: '古代魔法陣のモダナイゼーションを推進。TypeScroll、ReactSpell等のモダン魔法スタックで開発。',
+          tags: ['火属性魔法', '結界術', '不老不死'],
+          salary: '年俸 魔石700〜1,000個'
+        },
+        {
+          name: 'ダンジョンUXデザインリード',
+          company: 'ダークロード・スタジオ',
+          desc: '冒険者の探索体験を設計するポジション。トラップ配置からボス部屋演出まで、ダンジョン体験を創造。',
+          tags: ['罠設計', 'モンスター配置', '副業OK(別ダンジョン)'],
+          salary: '年俸 呪われた金貨650〜900枚'
+        }
+      ]
+    };
+
+    // ============================================
+    //  TRANSFORM FUNCTION
+    // ============================================
+    function transformToIsekai() {
+      // Prevent double trigger
+      if (document.body.classList.contains('isekai')) return;
+
+      // 1. Flash glitch overlay
+      document.getElementById('glitchOverlay').classList.add('active');
+
+      // 2. Add transition class
+      document.body.classList.add('transitioning');
+
+      // 3. After a brief delay, swap content and apply isekai theme
+      setTimeout(() => {
+        document.body.classList.add('isekai');
+        document.title = 'ISEKAI CAREER SCOUT';
+
+        // Update text content
+        document.getElementById('logoText').textContent = isekaiContent.logo;
+        document.getElementById('heroTitle').textContent = isekaiContent.heroTitle;
+        document.getElementById('heroSubtitle').textContent = isekaiContent.heroSubtitle;
+        document.getElementById('heroCta').textContent = isekaiContent.heroCta;
+        document.getElementById('navJobs').textContent = isekaiContent.navJobs;
+        document.getElementById('navFeatures').textContent = isekaiContent.navFeatures;
+        document.getElementById('navContact').textContent = isekaiContent.navContact;
+        document.getElementById('jobsTitle').textContent = isekaiContent.jobsTitle;
+        document.getElementById('jobsDesc').textContent = isekaiContent.jobsDesc;
+        document.getElementById('featuresTitle').textContent = isekaiContent.featuresTitle;
+        document.getElementById('featuresDesc').textContent = isekaiContent.featuresDesc;
+        document.getElementById('footerText').innerHTML = isekaiContent.footerText;
+
+        // Features
+        document.getElementById('feat1Icon').innerHTML = isekaiContent.feat1Icon;
+        document.getElementById('feat1Title').textContent = isekaiContent.feat1Title;
+        document.getElementById('feat1Desc').textContent = isekaiContent.feat1Desc;
+        document.getElementById('feat2Icon').innerHTML = isekaiContent.feat2Icon;
+        document.getElementById('feat2Title').textContent = isekaiContent.feat2Title;
+        document.getElementById('feat2Desc').textContent = isekaiContent.feat2Desc;
+        document.getElementById('feat3Icon').innerHTML = isekaiContent.feat3Icon;
+        document.getElementById('feat3Title').textContent = isekaiContent.feat3Title;
+        document.getElementById('feat3Desc').textContent = isekaiContent.feat3Desc;
+
+        // Update job cards
+        const cards = document.querySelectorAll('.job-card');
+        isekaiContent.jobs.forEach((job, i) => {
+          if (!cards[i]) return;
+          cards[i].querySelector('.job-name').textContent = job.name;
+          cards[i].querySelector('.job-company').textContent = job.company;
+          cards[i].querySelector('.job-desc').textContent = job.desc;
+          const tags = cards[i].querySelectorAll('.tag');
+          job.tags.forEach((t, j) => { if (tags[j]) tags[j].textContent = t; });
+          cards[i].querySelector('.job-salary').textContent = job.salary;
+        });
+
+        // 4. Show success toast
+        setTimeout(() => {
+          document.getElementById('successToast').classList.add('show');
+          setTimeout(() => {
+            document.getElementById('successToast').classList.remove('show');
+          }, 4000);
+        }, 800);
+
+      }, 300);
+
+      // Cleanup transition class
+      setTimeout(() => {
+        document.body.classList.remove('transitioning');
+      }, 2500);
+    }
+
+    // ============================================
+    //  MUTATION OBSERVER - watches for data-key change
+    // ============================================
+    const siteCore = document.getElementById('site-core');
+
+    const observer = new MutationObserver((mutations) => {
+      for (const mutation of mutations) {
+        if (mutation.type === 'attributes' && mutation.attributeName === 'data-key') {
+          const newValue = siteCore.getAttribute('data-key');
+          if (newValue === 'ISEKAI') {
+            transformToIsekai();
+            observer.disconnect();
+          }
+        }
+      }
+    });
+
+    observer.observe(siteCore, {
+      attributes: true,
+      attributeFilter: ['data-key']
+    });
+
+    // ============================================
+    //  CONSOLE HINT (subtle)
+    // ============================================
+    console.log(
+      '%c[SYSTEM] %cSEIKAI CAREER SCOUT v2.0.26',
+      'color: #3b82f6; font-weight: bold;',
+      'color: #64748b;'
+    );
+    console.log(
+      '%c[WARNING] %ccharset anomaly detected in #site-core — data-key mismatch',
+      'color: #f59e0b; font-weight: bold;',
+      'color: #64748b;'
+    );
+  </script>
+</body>
+</html>
